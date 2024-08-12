@@ -64,24 +64,107 @@ print('''\033[35m
 
 #----------------------------------------------
 
-'''
-01- Atividade
-    O sistema deve solicitar o número ao usuario
-    O sistema deve percorrer do 0 até o número escolhido 🆗
-    Se o numero for menor ou igual do 0 peça que o usuário digite novamente até receber um número valido 🆗
-    No laço se o número for PAR deve ficar em AZUL e se for IMPAR deve ficar em VERMELHO
+# '''
+# 01- Atividade
+#     O sistema deve solicitar o número ao usuario
+#     O sistema deve percorrer do 0 até o número escolhido 🆗
+#     Se o numero for menor ou igual do 0 peça que o usuário digite novamente até receber um número valido 🆗
+#     No laço se o número for PAR deve ficar em AZUL e se for IMPAR deve ficar em VERMELHO
+
+# '''
+# # numero = input('Digite um número maior que 0: ')
+# numero = '0'
+
+# while numero < '1':
+#     numero = input('Digite um número maior que 0: ')
+
+
+# for i in range(0, int(numero)+1):
+#     if i % 2 == 0:
+#         print('\033[34m' + str(i))
+#     else:
+#         print('\033[31m' + str(i))
+# ---------------------------------------------
+
 
 '''
-# numero = input('Digite um número maior que 0: ')
-numero = '0'
+02 - Atividade
+    -Solicitar ao usuário um digito 🆗
+    - Deve apresentar a quantidade em * na tela 🆗
+    - solicitar 2º número 🆗
+    - deve ser a quantidade de linhas apresentadas na tela 🆗
+    
+    - Crie o menu de acesso do jogo com as seguites opções: Jogar, Configurar e Sair
+    - Hoje a gente vai criar o configurar, dê as opções ao usuário para ele configurar o jogo dele
+    - Nessas configurações coloque uma terceira config "dificuldade", o usuário vai poder escolher  entre 1 e 3
 
-while numero < '1':
-    numero = input('Digite um número maior que 0: ')
+'''
+from openpyxl import Workbook, load_workbook
+
+def configs():
+
+    try:
+        wb = load_workbook(filename='campo.xlsx')
+        config = wb['config']
+        
+    except:
+        #criando tabela 
+        wb = Workbook()
+        config = wb.create_sheet('config')
+        config.cell(column=1, row=1, value="linha")
+        config.cell(column=2, row=1, value=5)
+        config.cell(column=1, row=2, value="coluna")
+        config.cell(column=2, row=2, value=5)
+
+    linhas = config.cell(column=2, row=1).value
+    colunas = config.cell(column=2, row=2).value
+ 
+    wb.save('campo.xlsx')
+
+    # print('linhas: ' + str(linhas))
+    # print('colunas: ' + str(colunas))
+    return linhas, colunas
+
+def criarTabuleiro(qtdLinha, qtdColuna):
+    print('- - - ' * int(qtdColuna))
+    for i in range(0, int(qtdLinha)):
+        for j in range(0, int(qtdColuna)):
+            # print('| * |', end=' ')
+            print('{:5}' . format('[   ]'), end=' ')
+        print()
+        print('- - - ' * int(qtdColuna))
+        
+qtdLinha = 0
+qtdColuna = 0
 
 
-for i in range(0, int(numero)+1):
-    if i % 2 == 0:
-        print('\033[34m' + str(i))
+    
+while True:
+    #MENU DE SELEÇÃO
+    print('1 - JOGAR')
+    print('2 - CONFIGURAR')
+    print('3 - SAIR')
+    opcao = input('Escolha uma opção: ')
+
+    if opcao == '1':
+        print('JOGAR')
+
+    elif opcao == '2':
+        while int(qtdLinha) < 1:
+            qtdLinha = input('Digite um número maior que 0 (LINHAS): ')
+        while int(qtdColuna) < 1:
+            qtdColuna = input('Digite um número maior que 0 (COLUNAS): ')
+
+        criarTabuleiro(qtdLinha, qtdColuna)
+        qtdLinha, qtdColuna = configs()
+        
+    elif opcao == '3':
+        print('Sair')
+        break
+        
     else:
-        print('\033[31m' + str(i))
+        print('burrão mané')
+
+
+
 
