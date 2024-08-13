@@ -94,15 +94,16 @@ print('''\033[35m
     - solicitar 2º número 🆗
     - deve ser a quantidade de linhas apresentadas na tela 🆗
     
-    - Crie o menu de acesso do jogo com as seguites opções: Jogar, Configurar e Sair
+    - Crie o menu de acesso do jogo com as seguites opções: Jogar, Configurar e Sair 🆗
     - Hoje a gente vai criar o configurar, dê as opções ao usuário para ele configurar o jogo dele
     - Nessas configurações coloque uma terceira config "dificuldade", o usuário vai poder escolher  entre 1 e 3
 
 '''
 from openpyxl import Workbook, load_workbook
+import random
+ 
 
 def configs():
-
     try:
         wb = load_workbook(filename='campo.xlsx')
         config = wb['config']
@@ -115,56 +116,111 @@ def configs():
         config.cell(column=2, row=1, value=5)
         config.cell(column=1, row=2, value="coluna")
         config.cell(column=2, row=2, value=5)
+        config.cell(column=1, row=3, value="dificuldade")
+        config.cell(column=2, row=3, value=2)
+
 
     linhas = config.cell(column=2, row=1).value
     colunas = config.cell(column=2, row=2).value
- 
+    dificuldade = config.cell(column=2, row=3).value
+
+
+
     wb.save('campo.xlsx')
 
-    # print('linhas: ' + str(linhas))
-    # print('colunas: ' + str(colunas))
-    return linhas, colunas
+    config = {
+        'linhas' : int(linhas),
+        'colunas' : int(colunas),
+        'dificuldade' : int(dificuldade)
+    }
+
+
+
+    return config
 
 def criarTabuleiro(qtdLinha, qtdColuna):
     print('- - - ' * int(qtdColuna))
     for i in range(0, int(qtdLinha)):
         for j in range(0, int(qtdColuna)):
-            # print('| * |', end=' ')
             print('{:5}' . format('[   ]'), end=' ')
         print()
         print('- - - ' * int(qtdColuna))
         
-qtdLinha = 0
-qtdColuna = 0
+def configCampo():
+    novaQtdColuna = input('Quntas Colunas : ')
+    novaQtdLinha = input('Quntas Linhas : ')
+    novaDificuldade = input('1- Fácil \n2- Médio \n3- Difícil \n\nEscolha a dificuldade: ')
 
+    try:
+        wb = load_workbook(filename='campo.xlsx')
+        config = wb['config']
+    except:
+        wb = Workbook()
+        config = wb.create_sheet('config')
+
+    config.cell(column=1, row=1, value="linha")
+    config.cell(column=2, row=1, value=novaQtdLinha)
+    config.cell(column=1, row=2, value="coluna")
+    config.cell(column=2, row=2, value=novaQtdColuna)
+    config.cell(column=1, row=3, value="dificuldade")
+    config.cell(column=2, row=3, value=novaDificuldade)
+
+    wb.save('campo.xlsx')
+
+def calculoBombas():
+    '''
+    Descubra o valor total de 'casas' no tabuleiro, e a partir desse total calcule a quantidade de bombas que vai ter no tabuleiro;
+    fácil → 15%, médio → 30% e díficil → 50%. 
+    '''
+    config = configs()
+    totalCasas = config['linhas'] * config['colunas']
 
     
-while True:
-    #MENU DE SELEÇÃO
-    print('1 - JOGAR')
-    print('2 - CONFIGURAR')
-    print('3 - SAIR')
-    opcao = input('Escolha uma opção: ')
+    if config['dificuldade'] == 1:
+        quantBomba = totalCasas * 0.15
 
-    if opcao == '1':
-        print('JOGAR')
+    if config['dificuldade'] == 2:
+        quantBomba = totalCasas * 0.30
 
-    elif opcao == '2':
-        while int(qtdLinha) < 1:
-            qtdLinha = input('Digite um número maior que 0 (LINHAS): ')
-        while int(qtdColuna) < 1:
-            qtdColuna = input('Digite um número maior que 0 (COLUNAS): ')
+    if config['dificuldade'] == 3:
+        quantBomba = totalCasas * 0.50
 
-        criarTabuleiro(qtdLinha, qtdColuna)
-        qtdLinha, qtdColuna = configs()
+    print('Total de bombas: {}' .format(int(quantBomba)))
+
+    
+    
+
+    # print(random.randint(1, 10))
+
+
+
+    return int(quantBomba)
+#==========================================================================
+
+# config = configs()
+# criarTabuleiro(config['linhas'], config['colunas'])
+calculoBombas()
+
+# while True:
+#     #MENU DE SELEÇÃO
+#     print('1 - JOGAR \n2 - CONFIGURAR \n3 - SAIR')
+    
+#     opcao = input('Escolha uma opção: ')
+
+#     if opcao == '1':
+#         print('JOGAR')
+
+#     elif opcao == '2':
+#         print('CONFIGURAR')
+#         configCampo()
+#         config = configs()
+#         criarTabuleiro(config['linhas'], config['colunas'])
         
-    elif opcao == '3':
-        print('Sair')
-        break
-        
-    else:
-        print('burrão mané')
-
-
+#     elif opcao == '3':
+#         print('Sair')
+#         break
+                
+#     else:
+#         print('Selecione uma opção válida!')
 
 
