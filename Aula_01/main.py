@@ -146,23 +146,20 @@ def criarTabuleiro():
     tabuleiro = []
     cont = 1
 
-
     #0 → Casa vazia |     -1 → bombas 
-
-
 
     for i in range(0, int(qtdLinha)):
         linha = []
         for j in range(0, int(qtdColuna)):
-            # print('{:5}' . format('[  ]'), end=' ')
+            print('{:5}' . format('[  ]'), end=' ')
             if cont in bombas:
-                linha.append('-1')
+                linha.append(-1)
                 # linha.append('💣')
             else:
-                linha.append('0')
+                linha.append(0)
 
             cont += 1
-        # print()
+        print()
         # print('- - - ' * int(qtdColuna))
         tabuleiro.append(linha)
 
@@ -179,20 +176,37 @@ def gravarTabuleiro(tabuleiro):
     except:
         abaJogo = wb.create_sheet('jogo')
 
-    print()
-    
+    abaJogo.delete_rows(1, abaJogo.max_row)
+    abaJogo.delete_cols(1, abaJogo.max_column)
+
     for linha in range(1, len(tabuleiro) + 1):
         for coluna in range(1, len(tabuleiro[0]) + 1):
             abaJogo.cell(row=linha, column=coluna, value=tabuleiro[linha -1][coluna -1])
 
     wb.save('campo.xlsx')
-
-    print()
     
 def configCampo():
-    novaQtdColuna = input('Quntas Colunas : ')
-    novaQtdLinha = input('Quntas Linhas : ')
+    # novaQtdColuna = 3
+    # novaQtdLinha = 3
+    # novaDificuldade = 1
+
+    #LINHAS 
+    novaQtdLinha = input('Nº de Linhas (mínimo 3): ')
+    while int(novaQtdLinha) < 3:
+        print("Valor inválido, insira novamente um valor maior ou igual a 3!")
+        novaQtdLinha = input('Quntas Linhas : ')
+    
+    #COLUNAS 
+    novaQtdColuna = input('Nº de Colunas (mínimo 3): ')
+    while int(novaQtdColuna) < 3:
+        print("Valor inválido, insira novamente um valor maior ou igual a 3!")
+        novaQtdColuna = input('Quntas Colunas : ')
+
+    #DIFICULDADE 
     novaDificuldade = input('1- Fácil \n2- Médio \n3- Difícil \n\nEscolha a dificuldade: ')
+    while int(novaDificuldade) < 1 or int(novaDificuldade) > 3:
+        print("Valor inválido, escolha novamente!")
+        novaDificuldade = input('1- Fácil \n2- Médio \n3- Difícil \n\nEscolha a dificuldade: ')
 
     try:
         wb = load_workbook(filename='campo.xlsx')
@@ -247,25 +261,38 @@ def calculoBombas():
     return bombas
 
 def jogar():
+    criarTabuleiro()
     wb          = load_workbook(filename='campo.xlsx')
     jogo        = wb['jogo']
     maxLinha    = jogo.max_row
     maxColuna   = jogo.max_column
     gameOver    = False
+    jgPossivel = (maxLinha * maxColuna) - len(calculoBombas())
+    historico = 0
 
     while True:
         # linhaJogada = 3
         # colunaJogada = 2
         linhaJogada = int(input('Linha: '))
+        while linhaJogada > maxLinha:
+            print("Esse valor excede o número de linhas, jogue novamente um valor menor: ")
+            linhaJogada = int(input('Linha: '))
+                
         colunaJogada = int(input('Coluna: '))
+        while colunaJogada > maxColuna:
+            print("Esse valor excede o número de colunas, jogue novamente um valor menor: ")
+            colunaJogada = int(input('Coluna: '))
+
+
         # [ ], 🆗, 💣
 
         jogada = int(jogo.cell(row=linhaJogada, column=colunaJogada).value)
 
         if jogada == 0:
             jogo.cell(row=linhaJogada, column=colunaJogada, value=1)
+            historico += 1
         elif jogada == -1:
-            jogo.cell(row=linhaJogada, column=colunaJogada, value=-2)
+            # jogo.cell(row=linhaJogada, column=colunaJogada, value=-2)
             gameOver = True
         elif jogada == 1:
             print('Você ja tentou esse, tente novamente!')
@@ -274,47 +301,46 @@ def jogar():
         for linha in range(1, maxLinha + 1):
             for coluna in range(1, maxColuna + 1):
                 casa = jogo.cell(row=linha, column=coluna).value
-                if int(casa) == 0 or int(casa) == -1:
+                if int(casa) == 0 or (int(casa) == -1 and gameOver == False):
                     print('{:5}' . format('[🏠]'), end='')
                 elif int(casa) == 1:
                     print('{:5}' . format('[🆗]'), end='')
-                elif int(casa) == -2:
-                    print('{:5}' . format('[💣]'), end='')
+                elif int(casa) == -1 and gameOver == True:
+                    print('{:5}' . format('[💥]'), end='')
 
             print()
         if gameOver == True:
             print("Allahu Akbar 💥💥💥💥❗❗❗")
             break
+        if historico == jgPossivel:
+            print("Parabéns, você ganhou❗ 🎉")
+            break
+    if historico == jgPossivel or gameOver == True:
+        op = input('Deseja jogar novamente? (s/n):')
+        if op == 's':
+            jogar()
         
-criarTabuleiro()
-jogar()
-#==========================================================================
 
 
-# config = configs()
-# criarTabuleiro(config['linhas'], config['colunas'])
-# calculoBombas()
+#============================ MENU ========================================
 
-# while True:
-#     #MENU DE SELEÇÃO
-#     print('1 - JOGAR \n2 - CONFIGURAR \n3 - SAIR')
+while True:
+    #MENU DE SELEÇÃO
+    print('1 - JOGAR \n2 - CONFIGURAR \n3 - SAIR')
     
-#     opcao = input('Escolha uma opção: ')
+    opcao = input('Escolha uma opção: ')
 
-#     if opcao == '1':
-#         print('JOGAR')
+    if opcao == '1':
+        jogar()
 
-#     elif opcao == '2':
-#         print('CONFIGURAR')
-#         configCampo()
-#         config = configs()
-#         criarTabuleiro(config['linhas'], config['colunas'])
+    elif opcao == '2':
+        configCampo()
         
-#     elif opcao == '3':
-#         print('Sair')
-#         break
+    elif opcao == '3':
+        print('Sair')
+        break
                 
-#     else:
-#         print('Selecione uma opção válida!')
+    else:
+        print('Selecione uma opção válida!')
 
 
